@@ -4,7 +4,7 @@ import random
 import math
 
 #valor exemplificativo
-new = 0.6
+new = 0.001
 tipo_animal =  [ "mammal", "bird", "reptile", "fish","amphibian","insect","invertebrate" ]
 
 
@@ -166,7 +166,6 @@ def translate(lista):
             if j == 13:
                 padrao = [0] * 10
                 padrao[int(lista[i][13])] = 1
-        
                 nova_lista += padrao                
             elif lista[i][j].isdigit():
                 nova_lista.append(int(lista[i][j]))
@@ -177,7 +176,6 @@ def translate(lista):
         tipo[tipo_animal.index(lista[i][2])] = 1
 
         lista[i].insert(3,tipo)
-
     random.shuffle(lista)
     pass
         
@@ -186,15 +184,17 @@ def train_zoo(training_set):
     """cria a rede e chama a funçao iterate para a treinar. Use 300 iteracoes"""
     #training_set[1][1] == input training_set[1][3] == output 
     #iterate(i, nn, input, output)
-    net = make(25, 25, 1)
-    for i in range(300):
+    #hidden = (2/3 * input)+output
+    #hidden = (2/3*25)+7
+    net = make(25, 24, 7)
+    for i in range(1000):
         [iterate(i, net, training_set[j][1], training_set[j][3]) for j in range(len(training_set))]
     return net
 
 def retranslate(out):
     """recebe o padrao de saida da rede e devolve o tipo de animal corresponte.
     Devolve o tipo de animal corresponde ao indice da saida com maior valor."""
-    return tipo_animal[out.index(1)]
+    return tipo_animal[out.index(max(out))]
 
 def test_zoo(net, test_set):
     """Funcao que avalia a precisao da rede treinada, utilizando o conjunto de teste.
@@ -202,23 +202,26 @@ def test_zoo(net, test_set):
     do animal que corresponde ao maior valor da lista de saida. O tipo determinado
     pela rede deve ser comparado com o tipo real, sendo contabilizado o número
     de respostas corretas. A função calcula a percentagem de respostas corretas"""
-    maxY = 0
-    nn_saida = list()
+    corretas = 0
     for i in range(len(test_set)):
         forward(net, test_set[i][1])
-        nn_saida.append(net['y'])
-        #retranslate(test_set[i][3])
-        #if net['y'][0] > maxY:
-            #maxY = net['y'][0]
-            #lista_saida.clear()
-            #lista_saida += test_set[i][3]
-    print(test_set[nn_saida.index(max(nn_saida))])
+        tipo = retranslate(net['y'])
+        if tipo == test_set[i][2]:
+            corretas+=1
+        print(f"The network thinks {test_set[i][0]} is a {tipo}, it should be a {test_set[i][2]}")
+    print("Success rate: ",(corretas/len(test_set))*100)
     
+    #netFIM = test_set[nn_saida.index(max(nn_saida))][1]
+
+    #print(netINIT)
+    #print(netFIM)
+    #if(netFIM == netINIT):
+        #print("CERTO")
     pass
 
 if __name__ == "__main__":
     #train_and()
     conjunto_treino,conjunto_testes = build_sets('zoo.txt')
-    n = train_zoo(conjunto_testes)
+    n = train_zoo(conjunto_treino)
     test_zoo(n,conjunto_testes) 
     #run()
