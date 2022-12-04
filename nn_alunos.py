@@ -4,7 +4,7 @@ import random
 import math
 
 #valor exemplificativo
-new = 0.001
+new = 2
 tipo_animal =  [ "mammal", "bird", "reptile", "fish","amphibian","insect","invertebrate" ]
 
 
@@ -114,7 +114,7 @@ def train_xor():
     """Funcao que cria uma rede 2x2x1 e treina um XOR"""
     
     net = make(2, 2, 1)
-    for i in range(10000):
+    for i in range(1000):
         iterate(i, net, [0, 0], [0])
         iterate(i, net, [0, 1], [1])
         iterate(i, net, [1, 0], [1])
@@ -126,7 +126,8 @@ def train_xor():
 def run():
     """Funcao principal do nosso programa, cria os conjuntos de treino e teste, chama
     a funcao que cria e treina a rede e, por fim, a funcao que a treina"""
-    
+    conjunto_treino,conjunto_testes = build_sets('zoo.txt')
+    test_zoo(train_zoo(conjunto_treino),conjunto_testes)     
     pass
     
 
@@ -158,6 +159,26 @@ def translate(lista):
     padrao_de_saida e uma lista de 0 e 1 que representa o tipo do animal. Tem 7 posicoes e a unica
     que estiver a 1 corresponde ao tipo do animal. E.g., [0 0 1 0 0 0 0] -> reptile.
     """
+    
+    ##extrair padrão de entrada e formatar o mesmo
+   
+    #padrao = [0] * 10
+    #print(nova[0][:12]+[0]*10+nova[0][13:])
+    
+    for i in range(len(lista)):
+        nova = list(map(int,lista[i][1:17]))
+        del lista[i][1:17]
+        padrao = [0] * 10
+        padrao[nova[12]] = 1
+        lista[i].insert(1,nova[:12]+padrao+nova[13:])
+        
+        tipo = [0] * 7
+        tipo[tipo_animal.index(lista[i][2])] = 1
+        lista[i].insert(3,tipo)
+    #print(lista)    
+    random.shuffle(lista)
+    
+    """
     for i in range(len(lista)):
         nova_lista = list()
                
@@ -176,7 +197,7 @@ def translate(lista):
         tipo[tipo_animal.index(lista[i][2])] = 1
 
         lista[i].insert(3,tipo)
-    random.shuffle(lista)
+    random.shuffle(lista)"""
     pass
         
 
@@ -187,7 +208,7 @@ def train_zoo(training_set):
     #hidden = (2/3 * input)+output
     #hidden = (2/3*25)+7
     net = make(25, 24, 7)
-    for i in range(1000):
+    for i in range(300):
         [iterate(i, net, training_set[j][1], training_set[j][3]) for j in range(len(training_set))]
     return net
 
@@ -209,19 +230,9 @@ def test_zoo(net, test_set):
         if tipo == test_set[i][2]:
             corretas+=1
         print(f"The network thinks {test_set[i][0]} is a {tipo}, it should be a {test_set[i][2]}")
-    print("Success rate: ",(corretas/len(test_set))*100)
-    
-    #netFIM = test_set[nn_saida.index(max(nn_saida))][1]
-
-    #print(netINIT)
-    #print(netFIM)
-    #if(netFIM == netINIT):
-        #print("CERTO")
+    print("Success rate: ",round((corretas/len(test_set))*100,2))
     pass
 
 if __name__ == "__main__":
     #train_and()
-    conjunto_treino,conjunto_testes = build_sets('zoo.txt')
-    n = train_zoo(conjunto_treino)
-    test_zoo(n,conjunto_testes) 
-    #run()
+    run()
